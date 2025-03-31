@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>校验码计算与条形码生成</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input { width: 200px; padding: 5px; }
+        button { padding: 8px 15px; background: #007bff; color: white; border: none; cursor: pointer; }
+        #result { margin-top: 20px; }
+        #barcode { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="input-group">
+        <label>信函类型（2位大写字母）:</label>
+        <input type="text" id="letterType" maxlength="2" placeholder="例如：XA">
+    </div>
+
+    <div class="input-group">
+        <label>8位数字编码:</label>
+        <input type="text" id="digits" maxlength="8" placeholder="例如：12345678">
+    </div>
+
+    <div class="input-group">
+        <label>省份代码（2位数字）:</label>
+        <input type="text" id="province" maxlength="2" placeholder="例如：11">
+    </div>
+
+    <button onclick="calculate()">计算校验码并生成条形码</button>
+
+    <div id="result"></div>
+    <div id="barcode"></div>
+
+    <script>
+        function calculate() {
+            // 获取输入值
+            const letterType = document.getElementById('letterType').value.toUpperCase();
+            const digits = document.getElementById('digits').value;
+            const province = document.getElementById('province').value;
+
+            // 输入验证
+            if (!/^[A-Z]{2}$/.test(letterType)) {
+                alert("请输入有效的2位大写字母信函类型");
+                return;
+            }
+
+            if (!/^\d{8}$/.test(digits)) {
+                alert("请输入有效的8位数字编码");
+                return;
+            }
+
+            if (!/^\d{2}$/.test(province)) {
+                alert("请输入有效的2位省份代码");
+                return;
+            }
+
+            // 计算校验码
+            const weights = [8, 6, 4, 2, 3, 5, 9, 7];
+            let k = 0;
+            for (let i = 0; i < 8; i++) {
+                k += parseInt(digits[i]) * weights[i];
+            }
+
+            const remainder = k % 11;
+            let checkDigit;
+            if (remainder >= 1 && remainder <= 9) {
+                checkDigit = remainder;
+            } else if (remainder === 10) {
+                checkDigit = 0;
+            } else {
+                checkDigit = 5;
+            }
+
+            // 生成完整编码
+            const fullCode = letterType + digits + checkDigit + province;
+
+            // 显示结果
+            document.getElementById('result').innerHTML = 
+                `校验码：${checkDigit}<br>完整编码：${fullCode}`;
+
+            // 生成条形码
+            document.getElementById('barcode').innerHTML = '<svg id="barcode-svg"></svg>';
+            JsBarcode("#barcode-svg", fullCode, {
+                format: "CODE128A",
+                displayValue: true,
+                fontSize: 16,
+                margin: 10
+            });
+        }
+    </script>
+</body>
+</html>

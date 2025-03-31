@@ -64,7 +64,8 @@
                 k += parseInt(digits[i]) * weights[i];
             }
 
-            const remainder = k % 11;
+            const remaindera = k % 11;
+	    const remainder = 11 - remaindera;
             let checkDigit;
             if (remainder >= 1 && remainder <= 9) {
                 checkDigit = remainder;
